@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard | BloodNet</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.css" rel="stylesheet" />
+  <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+  <style>
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px; }
+    ::-webkit-scrollbar-thumb { background: #888; border-radius: 10px; }
+    ::-webkit-scrollbar-thumb:hover { background: #555; }
+  </style>
+</head>
+<body class="bg-gray-50 font-sans antialiased">
+
+<div class="min-h-screen flex flex-col lg:flex-row">
+
+  <!-- Sidebar -->
+  <aside class="w-full lg:w-64 bg-gray-800 text-gray-100 p-6 space-y-6 flex flex-col justify-between shadow-lg">
+    <div>
+      <div class="flex items-center space-x-3 mb-8">
+        <svg class="h-8 w-8 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M19.428 15.428a2 2 0 000-2.856l-2.572-2.572a2 2 0 00-2.856 0L10.572 9.428a2 2 0 000 2.856l2.572 2.572a2 2 0 002.856 0l2.572-2.572zm-7.428 5.428l-2.572 2.572a2 2 0 01-2.856 0l-2.572-2.572a2 2 0 010-2.856l2.572-2.572a2 2 0 012.856 0l2.572 2.572a2 2 0 010 2.856zM4 12a8 8 0 1116 0A8 8 0 014 12z"/>
+        </svg>
+        <span class="text-2xl font-extrabold">BloodNet Admin</span>
+      </div>
+      <nav>
+        <a href="#" class="flex items-center space-x-3 py-2 px-4 rounded-lg hover:bg-gray-700 transition duration-200 text-white font-medium bg-gray-700" id="dashboard-link">
+          <i class="fas fa-chart-line"></i>
+          <span>Dashboard</span>
+        </a>
+        <a href="#" class="flex items-center space-x-3 py-2 px-4 rounded-lg hover:bg-gray-700 transition duration-200 text-gray-300 mt-2" id="donors-link">
+          <i class="fas fa-user-plus"></i>
+          <span>Pending Donors</span>
+        </a>
+        <a href="#" class="flex items-center space-x-3 py-2 px-4 rounded-lg hover:bg-gray-700 transition duration-200 text-gray-300 mt-2" id="requests-link">
+          <i class="fas fa-hand-holding-medical"></i>
+          <span>Blood Requests</span>
+        </a>
+      </nav>
+    </div>
+    <div>
+      <a href="/logout" class="flex items-center space-x-3 py-2 px-4 rounded-lg bg-red-600 hover:bg-red-700 transition duration-200 text-white font-medium">
+        <i class="fas fa-sign-out-alt"></i>
+        <span>Logout</span>
+      </a>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="flex-1 p-8 overflow-y-auto">
+    <header class="flex justify-between items-center mb-8 pb-4 border-b border-gray-200">
+      <h1 class="text-4xl font-extrabold text-gray-800">Welcome, Admin <span class="text-red-600">{{ session.admin_name }}</span>!</h1>
+      <div class="flex items-center space-x-4">
+        <span class="text-gray-600">Administrator</span>
+        <img src="https://via.placeholder.com/40" alt="Admin Avatar" class="rounded-full ring-2 ring-red-500">
+      </div>
+    </header>
+
+    <!-- Dashboard Overview -->
+    <section id="dashboard-overview" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
+      <div class="bg-white p-6 rounded-xl shadow-lg border border-gray-100 flex items-center justify-between">
+        <div>
+          <p class="text-gray-500 text-sm">Total Pending Donors</p>
+          <p class="text-3xl font-bold text-gray-800">{{ donors|length if donors else 0 }}</p>
+        </div>
+        <i class="fas fa-user-plus text-red-500 text-5xl opacity-20"></i>
+      </div>
+      <div class="bg-white p-6 rounded-xl shadow-lg border border-gray-100 flex items-center justify-between">
+        <div>
+          <p class="text-gray-500 text-sm">Total Pending Blood Requests</p>
+          <p class="text-3xl font-bold text-gray-800">{{ pending_requests|length if pending_requests else 0 }}</p>
+        </div>
+        <i class="fas fa-hand-holding-medical text-blue-500 text-5xl opacity-20"></i>
+      </div>
+      <div class="bg-white p-6 rounded-xl shadow-lg border border-gray-100 flex items-center justify-between">
+        <div>
+          <p class="text-gray-500 text-sm">Verified Donors</p>
+          <p class="text-3xl font-bold text-gray-800">{{ approved_requests|length if approved_requests else 0 }}</p>
+        </div>
+        <i class="fas fa-check-circle text-green-500 text-5xl opacity-20"></i>
+      </div>
+    </section>
+
+    <!-- Dynamic Content Area -->
+    <div id="content-area">
+
+      <!-- Pending Donors Section -->
+      <section id="pending-donors-section" class="bg-white p-8 rounded-xl shadow-lg border border-gray-100 hidden">
+        <h3 class="text-3xl font-extrabold text-gray-800 mb-6 flex items-center space-x-3">
+          <i class="fas fa-user-plus text-red-500"></i>
+          <span>Pending Donors</span>
+        </h3>
+        {% if donors %}
+          <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+              <thead class="bg-gray-50">
+                <tr>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Blood Group</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Location</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Contact</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                </tr>
+              </thead>
+              <tbody class="bg-white divide-y divide-gray-200">
+                {% for donor in donors %}
+                  <tr class="hover:bg-gray-50">
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ donor.name }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ donor.blood_group }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ donor.location }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ donor.contact }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                      <a href="/admin/verify_donor/{{ donor.id }}" class="text-green-600 hover:text-green-900 font-semibold flex items-center space-x-1">
+                        <i class="fas fa-check-circle"></i>
+                        <span>Verify</span>
+                      </a>
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        {% else %}
+          <p class="text-gray-600 italic">No pending donors.</p>
+        {% endif %}
+      </section>
+
+      <!-- Pending Blood Requests Section -->
+      <section id="blood-requests-section" class="bg-white p-8 rounded-xl shadow-lg border border-gray-100 hidden">
+        <h3 class="text-3xl font-extrabold text-gray-800 mb-6 flex items-center space-x-3">
+          <i class="fas fa-hand-holding-medical text-blue-500"></i>
+          <span>Pending Blood Requests</span>
+        </h3>
+        {% if pending_requests %}
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
+            {% for req in pending_requests %}
+              <div class="bg-blue-50 p-6 rounded-lg shadow-sm border border-blue-100 flex flex-col justify-between">
+                <div>
+                  <p class="text-lg font-bold text-blue-800 mb-2">{{ req.requester_name }} needs <span class="font-bold">{{ req.blood_group }}</span></p>
+                  <p class="text-gray-700"><i class="fas fa-map-marker-alt mr-2 text-blue-500"></i>Location: {{ req.location }}</p>
+                  <p class="text-gray-700"><i class="fas fa-phone-alt mr-2 text-blue-500"></i>Contact: {{ req.contact }}</p>
+                  <p class="text-gray-700 mt-3"><i class="fas fa-comment-dots mr-2 text-blue-500"></i>Message: {{ req.message }}</p>
+                </div>
+                <div class="mt-4 flex flex-wrap gap-2">
+                  <a href="/admin/approve_request/{{ req.id }}" class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded">Approve</a>
+                  <a href="/admin/reject_request/{{ req.id }}" class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded">Reject</a>
+                  <a href="/send_alert/{{ req.id }}" class="bg-indigo-500 hover:bg-indigo-600 text-white px-3 py-1 rounded">Send Alert</a>
+                  <a href="/recommend_donors/{{ req.id }}" class="bg-purple-500 hover:bg-purple-600 text-white px-3 py-1 rounded">Recommend Donors</a>
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <p class="text-gray-600 italic">No pending blood requests.</p>
+        {% endif %}
+      </section>
+
+    </div> <!-- End Dynamic Content Area -->
+
+  </main>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const dashboardLink = document.getElementById('dashboard-link');
+  const donorsLink = document.getElementById('donors-link');
+  const requestsLink = document.getElementById('requests-link');
+
+  const dashboardOverview = document.getElementById('dashboard-overview');
+  const pendingDonorsSection = document.getElementById('pending-donors-section');
+  const bloodRequestsSection = document.getElementById('blood-requests-section');
+
+  function activateLink(link) {
+    document.querySelectorAll('nav a').forEach(a => {
+      a.classList.remove('bg-gray-700','text-white');
+      a.classList.add('text-gray-300');
+    });
+    link.classList.add('bg-gray-700','text-white');
+    link.classList.remove('text-gray-300');
+  }
+
+  function showSection(section) {
+    dashboardOverview.classList.add('hidden');
+    pendingDonorsSection.classList.add('hidden');
+    bloodRequestsSection.classList.add('hidden');
+    section.classList.remove('hidden');
+  }
+
+  activateLink(dashboardLink);
+  showSection(dashboardOverview);
+
+  dashboardLink.addEventListener('click', function(e){ e.preventDefault(); activateLink(this); showSection(dashboardOverview); });
+  donorsLink.addEventListener('click', function(e){ e.preventDefault(); activateLink(this); showSection(pendingDonorsSection); });
+  requestsLink.addEventListener('click', function(e){ e.preventDefault(); activateLink(this); showSection(bloodRequestsSection); });
+});
+</script>
+</body>
+</html>

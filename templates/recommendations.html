@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Donor Recommendations</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 p-8">
+
+<h1 class="text-3xl font-bold mb-6">Top Recommended Donors</h1>
+
+{% if recommendations %}
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {% for donor in recommendations %}
+            <div class="bg-white p-6 rounded-lg shadow border">
+                <p class="font-bold text-lg">{{ donor.name }}</p>
+                <p>Email: <a href="mailto:{{ donor.email }}" class="text-blue-500">{{ donor.email }}</a></p>
+                <p>Location: {{ donor.location }}</p>
+               <a href="{{ url_for('send_email_to_donor', req_id=req_id, donor_id=donor.id) }}"
+   class="mt-2 inline-block bg-indigo-500 hover:bg-indigo-600 text-white px-3 py-1 rounded">
+   Send Email
+</a>
+
+            </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <p class="text-gray-600">No suitable donors found.</p>
+{% endif %}
+
+<a href="/admin/dashboard" class="mt-6 inline-block bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded">Back to Dashboard</a>
+
+
+</body>
+</html>

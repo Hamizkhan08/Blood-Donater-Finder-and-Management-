@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Login</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.css" rel="stylesheet" />
+  <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script> <!-- Font Awesome for icons -->
+</head>
+<body class="bg-gradient-to-br from-red-600 to-red-800 flex items-center justify-center h-screen font-sans antialiased">
+  <div class="bg-white p-10 rounded-xl shadow-2xl w-full max-w-md transform transition-all duration-300 hover:scale-105">
+    <div class="text-center mb-8">
+      <svg class="mx-auto h-16 w-16 text-red-600 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 000-2.856l-2.572-2.572a2 2 0 00-2.856 0L10.572 9.428a2 2 0 000 2.856l2.572 2.572a2 2 0 002.856 0l2.572-2.572zm-7.428 5.428l-2.572 2.572a2 2 0 01-2.856 0l-2.572-2.572a2 2 0 010-2.856l2.572-2.572a2 2 0 012.856 0l2.572 2.572a2 2 0 010 2.856zM4 12a8 8 0 1116 0A8 8 0 014 12z"/>
+      </svg>
+      <h2 class="text-4xl font-extrabold text-gray-900">Admin Login</h2>
+      <p class="text-gray-500 mt-2">Access your dashboard securely</p>
+    </div>
+    <form method="POST" class="space-y-6">
+      <div>
+        <label for="username" class="sr-only">Username</label>
+        <div class="relative">
+          <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <i class="fas fa-user text-gray-400"></i>
+          </div>
+          <input type="text" name="username" id="username" placeholder="Username"
+                 class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-red-500 focus:border-red-500 shadow-sm transition duration-200"
+                 required autocomplete="username">
+        </div>
+      </div>
+      <div>
+        <label for="password" class="sr-only">Password</label>
+        <div class="relative">
+          <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <i class="fas fa-lock text-gray-400"></i>
+          </div>
+          <input type="password" name="password" id="password" placeholder="Password"
+                 class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-red-500 focus:border-red-500 shadow-sm transition duration-200"
+                 required autocomplete="current-password">
+        </div>
+      </div>
+      <button type="submit"
+              class="w-full bg-red-600 text-white p-3 rounded-lg font-semibold text-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition duration-200 transform hover:scale-105 shadow-md">
+        <i class="fas fa-sign-in-alt mr-2"></i>Login
+      </button>
+    </form>
+    {% if error %}
+      <p class="mt-4 text-center text-red-500">{{ error }}</p>
+    {% endif %}
+  </div>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.js"></script>
+</body>
+</html>
