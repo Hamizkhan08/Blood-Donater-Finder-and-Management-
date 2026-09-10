@@ -245,22 +245,22 @@ def send_email_alert(to_email, subject, body):
     except Exception as e:
         print(f"Error sending email to {to_email}: {e}")
 
-# ---------------- USER HOME ----------------
+# ---------------- HOME / LANDING ----------------
 @app.route('/')
 def home():
+    conn = get_db_connection()
+    try:
+        with conn.cursor() as cur:
+            cur.execute("SELECT COUNT(*) as cnt FROM users WHERE verified=1")
+            total_donors = cur.fetchone()['cnt']
+            cur.execute("SELECT COUNT(*) as cnt FROM blood_requests")
+            total_requests = cur.fetchone()['cnt']
+            cur.execute("SELECT COUNT(DISTINCT location) as cnt FROM users WHERE verified=1")
+            cities_count = cur.fetchone()['cnt']
+    finally:
+        conn.close()
+
     if "user_id" in session:
-        # Fetch stats for home counters
-        conn = get_db_connection()
-        try:
-            with conn.cursor() as cur:
-                cur.execute("SELECT COUNT(*) as cnt FROM users WHERE verified=1")
-                total_donors = cur.fetchone()['cnt']
-                cur.execute("SELECT COUNT(*) as cnt FROM blood_requests")
-                total_requests = cur.fetchone()['cnt']
-                cur.execute("SELECT COUNT(DISTINCT location) as cnt FROM users WHERE verified=1")
-                cities_count = cur.fetchone()['cnt']
-        finally:
-            conn.close()
         return render_template(
             "home.html",
             name=session.get("name", "User"),
@@ -270,7 +270,15 @@ def home():
         )
     elif "admin_id" in session:
         return redirect("/admin/dashboard")
-    return redirect("/login")
+
+    # Render Public Promo Landing Page for unauthenticated visitors
+    return render_template(
+        "landing.html",
+        total_donors=total_donors,
+        total_requests=total_requests,
+        cities_count=cities_count,
+        valid_blood_groups=VALID_BLOOD_GROUPS
+    )
 
 # ---------- REGISTER ----------
 @app.route('/register', methods=["GET", "POST"])

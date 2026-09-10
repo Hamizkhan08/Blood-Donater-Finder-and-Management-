@@ -3,3 +3,5 @@ bloodfinder.db
 test_bloodfinder.db
 __pycache__/
 *.pyc
+
+.vercel
