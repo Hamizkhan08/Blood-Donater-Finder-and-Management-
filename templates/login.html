@@ -1,47 +1,97 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>BloodConnect - Login</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>User Login - BloodConnect</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
-    body {
-      font-family: 'Inter', sans-serif;
-      background: url("{{ url_for('static', filename='1758447159096.jpg') }}") no-repeat center center fixed;
-      background-size: cover;
-    }
+    body { font-family: 'Plus Jakarta Sans', sans-serif; }
   </style>
 </head>
-<body class="min-h-screen flex flex-col items-center justify-between p-6">
+<body class="bg-gradient-to-br from-red-50 via-slate-50 to-white min-h-screen text-slate-800 flex flex-col justify-between antialiased">
 
-  <div class="flex-grow flex items-center justify-center w-full">
-    <div class="bg-white rounded-xl shadow-lg border border-gray-100 p-8 max-w-sm w-full text-center">
-      <div class="flex items-center justify-center mb-6">
-        <img src="https://previews.123rf.com/images/ihorsvetiukha/ihorsvetiukha1809/ihorsvetiukha180900018/110431259-two-hands-donate-blood-world-blood-donor-day-concept-red-drop-symbol-of-volunteer-blood-donation.jpg" alt="Blood Drop Icon" class="h-10 w-10 mr-2 text-red-500">
+  <!-- Header -->
+  <header class="p-6">
+    <div class="max-w-7xl mx-auto flex items-center justify-between">
+      <a href="/" class="flex items-center space-x-3">
+        <div class="h-10 w-10 bg-gradient-to-tr from-red-600 to-rose-500 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-red-500/20">
+          <i class="fas fa-droplet text-lg"></i>
+        </div>
+        <span class="text-2xl font-extrabold text-slate-900 tracking-tight">Blood<span class="text-red-600">Connect</span></span>
+      </a>
+      <a href="/admin/login" class="text-xs font-semibold px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl transition flex items-center space-x-2">
+        <i class="fas fa-user-shield"></i><span>Admin Login</span>
+      </a>
+    </div>
+  </header>
+
+  <!-- Login Card -->
+  <main class="flex-1 flex items-center justify-center p-6">
+    <div class="bg-white p-8 sm:p-10 rounded-3xl shadow-xl shadow-slate-100 border border-slate-100 max-w-md w-full">
+      
+      <div class="text-center mb-8">
+        <div class="h-14 w-14 bg-red-50 text-red-600 rounded-2xl flex items-center justify-center text-2xl mx-auto mb-4">
+          <i class="fas fa-right-to-bracket"></i>
+        </div>
+        <h2 class="text-3xl font-extrabold text-slate-900">Welcome Back</h2>
+        <p class="text-slate-500 text-sm mt-1">Sign in to search donors or submit requests</p>
       </div>
-      <h2 class="text-3xl font-bold text-gray-800 mb-2">Welcome Back!</h2>
-      <p class="text-gray-500 mb-8">Sign in to continue to your account.</p>
 
-      <form method="POST" class="space-y-4">
+      <!-- Flash Messages -->
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          <div class="mb-6 space-y-2">
+            {% for category, message in messages %}
+              <div class="p-3 text-xs font-semibold rounded-xl flex items-center space-x-2 {% if category == 'danger' %}bg-red-100 text-red-700 border border-red-200{% elif category == 'success' %}bg-emerald-100 text-emerald-700 border border-emerald-200{% else %}bg-blue-100 text-blue-700 border border-blue-200{% endif %}">
+                <i class="fas fa-circle-info text-sm"></i>
+                <span>{{ message }}</span>
+              </div>
+            {% endfor %}
+          </div>
+        {% endif %}
+      {% endwith %}
+
+      <form method="POST" class="space-y-5">
         <div>
-          <label for="email" class="sr-only">Email or username</label>
-          <input type="email" name="email" id="email" placeholder="Email or username" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-400 focus:border-transparent transition duration-200" required>
+          <label for="email" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Email Address</label>
+          <div class="relative">
+            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400">
+              <i class="fas fa-envelope"></i>
+            </div>
+            <input type="email" name="email" id="email" placeholder="e.g. hamizkhan@ggsf.edu.in" required
+                   class="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-red-500 focus:border-red-500 text-slate-800 font-medium">
+          </div>
         </div>
+
         <div>
-          <label for="password" class="sr-only">Password</label>
-          <input type="password" name="password" id="password" placeholder="Password" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-400 focus:border-transparent transition duration-200" required>
+          <label for="password" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Password</label>
+          <div class="relative">
+            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400">
+              <i class="fas fa-lock"></i>
+            </div>
+            <input type="password" name="password" id="password" placeholder="••••••••" required
+                   class="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-red-500 focus:border-red-500 text-slate-800 font-medium">
+          </div>
         </div>
-        <button type="submit" class="w-full bg-red-600 text-white font-semibold py-3 rounded-lg hover:bg-red-700 transition duration-200 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2">Log In</button>
+
+        <button type="submit" class="w-full py-4 bg-red-600 hover:bg-red-700 text-white font-bold text-base rounded-2xl shadow-lg shadow-red-600/30 transition flex items-center justify-center space-x-2">
+          <i class="fas fa-sign-in-alt"></i><span>Log In</span>
+        </button>
       </form>
 
-      <p class="mt-6 text-sm text-gray-600">Don’t have an account? <a href="/register" class="text-red-600 hover:text-red-700 font-medium">Sign up</a></p>
-    </div>
-  </div>
+      <div class="mt-8 pt-6 border-t border-slate-100 text-center text-sm text-slate-500">
+        Don’t have an account? <a href="/register" class="text-red-600 font-bold hover:underline">Register as Donor</a>
+      </div>
 
-  <!-- Bottom Interactive Bar -->
-  <div class="w-full bg-white p-4 text-center text-sm text-gray-500 border-t border-gray-100 shadow-inner fixed bottom-0 left-0">
-    &copy; 2025 BloodConnect. Saving Lives Together.
-  </div>
+    </div>
+  </main>
+
+  <footer class="p-6 text-center text-xs text-slate-400">
+    &copy; 2026 BloodConnect Emergency Network
+  </footer>
 
 </body>
 </html>

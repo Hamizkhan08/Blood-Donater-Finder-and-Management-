@@ -3,114 +3,128 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Request Blood - BloodConnect</title>
+  <title>Submit Blood Request - BloodConnect</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous" rel="stylesheet"> <!-- Font Awesome -->
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
-    @keyframes ping-slow {
-      0% { transform: scale(0.9); opacity: 0.8; }
-      50% { transform: scale(1.05); opacity: 1; }
-      100% { transform: scale(0.9); opacity: 0.8; }
-    }
-    .animate-ping-slow {
-      animation: ping-slow 3s cubic-bezier(0,0,0.2,1) infinite;
-    }
+    body { font-family: 'Plus Jakarta Sans', sans-serif; }
   </style>
 </head>
-<body class="bg-gradient-to-br from-red-50 to-white min-h-screen flex items-center justify-center font-sans antialiased p-6">
-  <div class="bg-white p-8 rounded-2xl shadow-xl max-w-md w-full relative overflow-hidden transform transition-all duration-300 hover:scale-105">
-    
-    
+<body class="bg-gradient-to-br from-rose-50 via-slate-50 to-white min-h-screen text-slate-800 flex flex-col justify-between">
 
-    <!-- Decorative droplets -->
-    <div class="absolute -top-10 -left-10 w-32 h-32 bg-red-100 rounded-full opacity-20 transform rotate-45"></div>
-    <div class="absolute -bottom-10 -right-10 w-32 h-32 bg-red-100 rounded-full opacity-20 transform -rotate-45"></div>
+  <!-- Navigation Bar -->
+  <nav class="bg-white/90 backdrop-blur-md border-b border-slate-100 sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+      <a href="/" class="flex items-center space-x-3">
+        <div class="h-10 w-10 bg-gradient-to-tr from-red-600 to-rose-500 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-red-500/20">
+          <i class="fas fa-droplet text-lg"></i>
+        </div>
+        <span class="text-2xl font-extrabold text-slate-900 tracking-tight">Blood<span class="text-red-600">Connect</span></span>
+      </a>
 
-    <!-- Header -->
-    <div class="text-center mb-6 relative z-10">
-      <svg class="mx-auto h-14 w-14 text-red-600 mb-3 animate-ping-slow" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3m0 0v3m0-3h3m-3 0H9m12a9 9 0 11-18 0 9 9 0 0118 0z" />
-      </svg>
-      <h2 class="text-3xl font-extrabold text-gray-900 leading-tight">Request Blood</h2>
-      <p class="text-gray-500 mt-1 text-md">Every request brings hope. Save a life today!</p>
+      <a href="/" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-sm font-semibold transition flex items-center space-x-2">
+        <i class="fas fa-arrow-left"></i><span>Back to Home</span>
+      </a>
+    </div>
+  </nav>
+
+  <!-- Main Request Container -->
+  <main class="max-w-2xl mx-auto px-6 py-10 flex-1 w-full space-y-8">
+    
+    <div class="text-center">
+      <span class="px-3.5 py-1.5 bg-rose-100 text-rose-700 text-xs font-bold rounded-full uppercase tracking-wider">Emergency Response Dispatch</span>
+      <h1 class="text-3xl sm:text-4xl font-extrabold text-slate-900 mt-3 mb-2">Request Emergency Blood</h1>
+      <p class="text-slate-500 text-sm">Fill out the details below. Our admin team will verify and broadcast alerts to matching donors.</p>
     </div>
 
-    <!-- Form -->
-    <form method="POST" class="space-y-3 relative z-10">
-      <!-- Name -->
-      <div>
-        <label for="name" class="sr-only">Your Name</label>
-        <div class="relative">
-          <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <i class="fas fa-user text-gray-400"></i>
-          </div>
-          <input type="text" name="name" id="name" placeholder="Your Name" required
-                 class="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-red-500 focus:border-red-500 shadow-sm transition duration-200 text-base">
+    <!-- Flash Alerts -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="space-y-2">
+          {% for category, message in messages %}
+            <div class="p-4 text-sm rounded-2xl flex items-center justify-between {% if category == 'danger' %}bg-red-100 text-red-800 border border-red-200{% elif category == 'success' %}bg-emerald-100 text-emerald-800 border border-emerald-200{% else %}bg-blue-100 text-blue-800 border border-blue-200{% endif %}">
+              <div class="flex items-center space-x-3">
+                <i class="fas fa-circle-info text-lg"></i>
+                <span>{{ message }}</span>
+              </div>
+            </div>
+          {% endfor %}
         </div>
-      </div>
+      {% endif %}
+    {% endwith %}
 
-      <!-- Blood Group -->
-      <div>
-        <label for="blood_group" class="sr-only">Blood Group Needed</label>
-        <div class="relative">
-          <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <i class="fas fa-tint text-gray-400"></i>
+    <!-- Request Form Card -->
+    <div class="bg-white p-8 rounded-3xl shadow-xl shadow-slate-100 border border-slate-100">
+      <form method="POST" class="space-y-5">
+        
+        <!-- Name -->
+        <div>
+          <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Patient / Requester Name</label>
+          <div class="relative">
+            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400">
+              <i class="fas fa-user"></i>
+            </div>
+            <input type="text" name="name" placeholder="Full Name" value="{{ session.get('name', '') }}" required
+                   class="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-red-500 focus:border-red-500 text-slate-800 font-medium">
           </div>
-          <input type="text" name="blood_group" id="blood_group" placeholder="Blood Group Needed (e.g., A+, O-)" required
-                 class="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-red-500 focus:border-red-500 shadow-sm transition duration-200 text-base">
         </div>
-      </div>
 
-      <!-- Location -->
-      <div>
-        <label for="location" class="sr-only">Location</label>
-        <div class="relative">
-          <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <i class="fas fa-map-marker-alt text-gray-400"></i>
+        <!-- Blood Group Needed -->
+        <div>
+          <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Blood Group Needed</label>
+          <select name="blood_group" required class="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-red-500 focus:border-red-500 text-base font-semibold text-slate-800">
+            <option value="" disabled selected>Select Required Blood Group</option>
+            {% for bg in valid_blood_groups %}
+              <option value="{{ bg }}">{{ bg }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <!-- Hospital Location -->
+        <div>
+          <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Hospital & City Location</label>
+          <div class="relative">
+            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400">
+              <i class="fas fa-hospital"></i>
+            </div>
+            <input type="text" name="location" placeholder="Hospital Name, Area, City (e.g. City Hospital, Nashik)" required
+                   class="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-red-500 focus:border-red-500 text-slate-800 font-medium">
           </div>
-          <input type="text" name="location" id="location" placeholder="Location (City/Area)" required
-                 class="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-red-500 focus:border-red-500 shadow-sm transition duration-200 text-base">
         </div>
-      </div>
 
-      <!-- Contact -->
-      <div>
-        <label for="contact" class="sr-only">Contact</label>
-        <div class="relative">
-          <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <i class="fas fa-phone-alt text-gray-400"></i>
+        <!-- Contact Phone -->
+        <div>
+          <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Emergency Contact Phone Number</label>
+          <div class="relative">
+            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400">
+              <i class="fas fa-phone"></i>
+            </div>
+            <input type="text" name="contact" placeholder="Mobile Number for Donors to Call" required
+                   class="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-red-500 focus:border-red-500 text-slate-800 font-medium">
           </div>
-          <input type="text" name="contact" id="contact" placeholder="Contact Number" required
-                 class="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-red-500 focus:border-red-500 shadow-sm transition duration-200 text-base">
         </div>
-      </div>
 
-      <!-- Message -->
-      <div>
-        <label for="message" class="sr-only">Additional Information</label>
-        <div class="relative">
-          <div class="absolute inset-y-0 left-0 pt-2.5 pl-3 flex items-start pointer-events-none">
-            <i class="fas fa-comment-dots text-gray-400"></i>
-          </div>
-          <textarea name="message" id="message" placeholder="Additional Information (e.g., urgency, hospital name)" rows="3"
-                    class="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-red-500 focus:border-red-500 shadow-sm transition duration-200 text-base"></textarea>
+        <!-- Additional Message / Urgency -->
+        <div>
+          <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Additional Medical Notes / Urgency (Optional)</label>
+          <textarea name="message" rows="3" placeholder="e.g., Surgery scheduled for 4 PM, ICU Bed 12, platelet requirement..."
+                    class="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-red-500 focus:border-red-500 text-slate-800 font-medium text-sm"></textarea>
         </div>
-      </div>
 
-      <!-- Submit Button -->
-      <button type="submit"
-              class="w-full bg-red-600 text-white p-3 rounded-lg font-semibold text-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition duration-200 transform hover:scale-105 shadow-md flex items-center justify-center space-x-2">
-        <i class="fas fa-paper-plane"></i><span>Submit Request</span>
-      </button>
-    </form>
+        <button type="submit" class="w-full py-4 bg-red-600 hover:bg-red-700 text-white font-bold text-base rounded-2xl shadow-lg shadow-red-600/30 transition flex items-center justify-center space-x-2">
+          <i class="fas fa-paper-plane"></i><span>Submit Emergency Request</span>
+        </button>
 
-    <!-- Messages -->
-    {% if success_message %}
-      <p class="mt-4 text-center text-red-700 relative z-10">{{ success_message }}</p>
-    {% endif %}
-    {% if error %}
-      <p class="mt-4 text-center text-red-500 relative z-10">{{ error }}</p>
-    {% endif %}
-  </div>
+      </form>
+    </div>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-white border-t border-slate-100 py-6 text-center text-xs text-slate-400">
+    &copy; 2026 BloodConnect Emergency Dispatch System
+  </footer>
+
 </body>
 </html>

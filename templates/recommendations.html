@@ -9,6 +9,18 @@
 
 <h1 class="text-3xl font-bold mb-6">Top Recommended Donors</h1>
 
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <div class="mb-6 space-y-2 max-w-2xl">
+      {% for category, message in messages %}
+        <div class="p-4 text-sm rounded-lg {% if category == 'danger' %}bg-red-100 text-red-700 border border-red-200{% elif category == 'success' %}bg-green-100 text-green-700 border border-green-200{% elif category == 'warning' %}bg-yellow-100 text-yellow-700 border border-yellow-200{% else %}bg-blue-100 text-blue-700 border border-blue-200{% endif %}" role="alert">
+          {{ message }}
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+{% endwith %}
+
 {% if recommendations %}
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         {% for donor in recommendations %}

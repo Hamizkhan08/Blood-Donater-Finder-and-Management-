@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Blood Requests - BloodConnect</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+  </style>
+</head>
+<body class="bg-gradient-to-br from-red-50 via-gray-50 to-white min-h-screen text-gray-800">
+
+  <!-- Navigation Bar -->
+  <nav class="bg-white/80 backdrop-blur-md border-b border-gray-100 sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+      <a href="/" class="flex items-center space-x-3">
+        <div class="h-10 w-10 bg-red-600 rounded-xl flex items-center justify-center text-white shadow-md shadow-red-200">
+          <i class="fas fa-droplet text-xl"></i>
+        </div>
+        <span class="text-2xl font-extrabold text-gray-900 tracking-tight">Blood<span class="text-red-600">Connect</span></span>
+      </a>
+
+      <div class="flex items-center space-x-4">
+        <a href="/" class="text-gray-600 hover:text-red-600 font-medium transition"><i class="fas fa-home mr-1"></i> Dashboard</a>
+        <a href="/logout" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl font-medium transition text-sm flex items-center space-x-2">
+          <i class="fas fa-sign-out-alt"></i><span>Logout</span>
+        </a>
+      </div>
+    </div>
+  </nav>
+
+  <main class="max-w-5xl mx-auto px-6 py-10">
+    <div class="flex items-center justify-between mb-8">
+      <div>
+        <h1 class="text-3xl font-extrabold text-gray-900">My Blood Requests</h1>
+        <p class="text-gray-500 mt-1">Track the status of your submitted emergency blood requests.</p>
+      </div>
+      <a href="/request_blood" class="px-5 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-xl font-semibold shadow-lg shadow-red-200 transition flex items-center space-x-2">
+        <i class="fas fa-plus"></i><span>New Request</span>
+      </a>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="mb-6 space-y-2">
+          {% for category, message in messages %}
+            <div class="p-4 text-sm rounded-xl {% if category == 'danger' %}bg-red-100 text-red-700 border border-red-200{% elif category == 'success' %}bg-green-100 text-green-700 border border-green-200{% else %}bg-blue-100 text-blue-700 border border-blue-200{% endif %}" role="alert">
+              {{ message }}
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    {% if requests %}
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {% for req in requests %}
+          <div class="bg-white rounded-2xl p-6 shadow-xl shadow-gray-100 border border-gray-100 relative flex flex-col justify-between">
+            <div>
+              <div class="flex justify-between items-start mb-4">
+                <span class="px-3 py-1 bg-red-100 text-red-700 font-extrabold rounded-lg text-sm">
+                  {{ req.blood_group }}
+                </span>
+                {% if req.approved %}
+                  <span class="px-3 py-1 bg-green-100 text-green-700 text-xs font-semibold rounded-full flex items-center space-x-1">
+                    <i class="fas fa-check-circle"></i><span>Approved & Broadcasted</span>
+                  </span>
+                {% else %}
+                  <span class="px-3 py-1 bg-yellow-100 text-yellow-700 text-xs font-semibold rounded-full flex items-center space-x-1">
+                    <i class="fas fa-clock"></i><span>Pending Review</span>
+                  </span>
+                {% endif %}
+              </div>
+
+              <h3 class="text-xl font-bold text-gray-900 mb-2">{{ req.requester_name }}</h3>
+              <p class="text-sm text-gray-600 mb-1"><i class="fas fa-location-dot text-red-500 mr-2"></i>{{ req.location }}</p>
+              <p class="text-sm text-gray-600 mb-3"><i class="fas fa-phone text-red-500 mr-2"></i>{{ req.contact }}</p>
+              
+              {% if req.message %}
+                <p class="text-sm bg-gray-50 p-3 rounded-xl text-gray-700 italic border border-gray-100">
+                  "{{ req.message }}"
+                </p>
+              {% endif %}
+            </div>
+
+            <div class="mt-6 pt-4 border-t border-gray-100 text-xs text-gray-400 flex justify-between items-center">
+              <span>Submitted: {{ req.created_at }}</span>
+              <a href="/search" class="text-red-600 font-semibold hover:underline">Find Donors →</a>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="bg-white rounded-2xl p-12 text-center shadow-xl shadow-gray-100 border border-gray-100">
+        <i class="fas fa-notes-medical text-5xl text-gray-300 mb-4"></i>
+        <h3 class="text-xl font-bold text-gray-800 mb-2">No blood requests submitted yet</h3>
+        <p class="text-gray-500 max-w-md mx-auto mb-6">If you or a loved one needs urgent blood, submit a request and our admin team will broadcast it to verified donors.</p>
+        <a href="/request_blood" class="inline-flex items-center space-x-2 px-6 py-3 bg-red-600 text-white font-semibold rounded-xl hover:bg-red-700 shadow-lg shadow-red-200 transition">
+          <i class="fas fa-plus"></i><span>Submit Blood Request</span>
+        </a>
+      </div>
+    {% endif %}
+  </main>
+</body>
+</html>

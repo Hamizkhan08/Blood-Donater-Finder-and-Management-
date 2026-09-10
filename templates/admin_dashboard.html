@@ -3,121 +3,214 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin Dashboard | BloodNet</title>
+  <title>Admin Command Center | BloodConnect</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.css" rel="stylesheet" />
-  <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  
+  <!-- Leaflet Map & Heatmap -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
+
   <style>
-    ::-webkit-scrollbar { width: 8px; }
-    ::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px; }
-    ::-webkit-scrollbar-thumb { background: #888; border-radius: 10px; }
-    ::-webkit-scrollbar-thumb:hover { background: #555; }
+    body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    #heatmap-container { height: 420px; border-radius: 1rem; }
+    .glass-card { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); }
   </style>
 </head>
-<body class="bg-gray-50 font-sans antialiased">
+<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col antialiased">
 
-<div class="min-h-screen flex flex-col lg:flex-row">
-
-  <!-- Sidebar -->
-  <aside class="w-full lg:w-64 bg-gray-800 text-gray-100 p-6 space-y-6 flex flex-col justify-between shadow-lg">
-    <div>
-      <div class="flex items-center space-x-3 mb-8">
-        <svg class="h-8 w-8 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                d="M19.428 15.428a2 2 0 000-2.856l-2.572-2.572a2 2 0 00-2.856 0L10.572 9.428a2 2 0 000 2.856l2.572 2.572a2 2 0 002.856 0l2.572-2.572zm-7.428 5.428l-2.572 2.572a2 2 0 01-2.856 0l-2.572-2.572a2 2 0 010-2.856l2.572-2.572a2 2 0 012.856 0l2.572 2.572a2 2 0 010 2.856zM4 12a8 8 0 1116 0A8 8 0 014 12z"/>
-        </svg>
-        <span class="text-2xl font-extrabold">BloodNet Admin</span>
+  <!-- Admin Navigation Header -->
+  <header class="bg-slate-800/80 backdrop-blur-md border-b border-slate-700/60 sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <div class="h-11 w-11 bg-gradient-to-tr from-red-600 to-rose-500 rounded-xl flex items-center justify-center text-white shadow-lg shadow-red-500/20">
+          <i class="fas fa-shield-halved text-xl"></i>
+        </div>
+        <div>
+          <span class="text-2xl font-extrabold text-white tracking-tight">Blood<span class="text-red-500">Connect</span></span>
+          <span class="ml-3 px-2.5 py-0.5 text-xs font-semibold bg-red-500/10 text-red-400 border border-red-500/20 rounded-full">ADMIN CENTER</span>
+        </div>
       </div>
-      <nav>
-        <a href="#" class="flex items-center space-x-3 py-2 px-4 rounded-lg hover:bg-gray-700 transition duration-200 text-white font-medium bg-gray-700" id="dashboard-link">
-          <i class="fas fa-chart-line"></i>
-          <span>Dashboard</span>
+
+      <div class="flex items-center space-x-6">
+        <div class="hidden md:flex items-center space-x-2 text-sm text-slate-300">
+          <i class="fas fa-user-gear text-red-400"></i>
+          <span>Logged in as: <strong class="text-white">{{ session.admin_name }}</strong></span>
+        </div>
+        <a href="/logout" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-xl text-sm font-semibold transition flex items-center space-x-2 shadow-lg shadow-red-600/30">
+          <i class="fas fa-power-off"></i><span>Logout</span>
         </a>
-        <a href="#" class="flex items-center space-x-3 py-2 px-4 rounded-lg hover:bg-gray-700 transition duration-200 text-gray-300 mt-2" id="donors-link">
-          <i class="fas fa-user-plus"></i>
-          <span>Pending Donors</span>
-        </a>
-        <a href="#" class="flex items-center space-x-3 py-2 px-4 rounded-lg hover:bg-gray-700 transition duration-200 text-gray-300 mt-2" id="requests-link">
-          <i class="fas fa-hand-holding-medical"></i>
-          <span>Blood Requests</span>
-        </a>
-      </nav>
+      </div>
     </div>
-    <div>
-      <a href="/logout" class="flex items-center space-x-3 py-2 px-4 rounded-lg bg-red-600 hover:bg-red-700 transition duration-200 text-white font-medium">
-        <i class="fas fa-sign-out-alt"></i>
-        <span>Logout</span>
-      </a>
+  </header>
+
+  <!-- Main Container -->
+  <main class="max-w-7xl mx-auto px-6 py-8 flex-1 w-full space-y-8">
+
+    <!-- Flash Alerts -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="space-y-2">
+          {% for category, message in messages %}
+            <div class="p-4 text-sm rounded-xl flex items-center justify-between {% if category == 'danger' %}bg-red-500/20 text-red-200 border border-red-500/40{% elif category == 'success' %}bg-emerald-500/20 text-emerald-200 border border-emerald-500/40{% elif category == 'warning' %}bg-amber-500/20 text-amber-200 border border-amber-500/40{% else %}bg-blue-500/20 text-blue-200 border border-blue-500/40{% endif %}">
+              <div class="flex items-center space-x-3">
+                <i class="fas fa-circle-info text-lg"></i>
+                <span>{{ message }}</span>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    <!-- Top KPI Cards Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      
+      <!-- Total Verified Donors -->
+      <div class="bg-slate-800/60 border border-slate-700/60 p-6 rounded-2xl flex items-center justify-between shadow-xl">
+        <div>
+          <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">Verified Donors</p>
+          <p class="text-3xl font-extrabold text-white mt-2">{{ verified_donors|length if verified_donors else 0 }}</p>
+          <p class="text-xs text-emerald-400 mt-2 flex items-center gap-1"><i class="fas fa-check-double"></i> Ready for Dispatch</p>
+        </div>
+        <div class="h-14 w-14 bg-emerald-500/10 text-emerald-400 rounded-2xl flex items-center justify-center text-2xl border border-emerald-500/20">
+          <i class="fas fa-user-check"></i>
+        </div>
+      </div>
+
+      <!-- Pending Donors -->
+      <div class="bg-slate-800/60 border border-slate-700/60 p-6 rounded-2xl flex items-center justify-between shadow-xl">
+        <div>
+          <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">Pending Approvals</p>
+          <p class="text-3xl font-extrabold text-white mt-2">{{ donors|length if donors else 0 }}</p>
+          <p class="text-xs text-amber-400 mt-2 flex items-center gap-1"><i class="fas fa-user-clock"></i> Requires Verification</p>
+        </div>
+        <div class="h-14 w-14 bg-amber-500/10 text-amber-400 rounded-2xl flex items-center justify-center text-2xl border border-amber-500/20">
+          <i class="fas fa-user-clock"></i>
+        </div>
+      </div>
+
+      <!-- Pending Blood Requests -->
+      <div class="bg-slate-800/60 border border-slate-700/60 p-6 rounded-2xl flex items-center justify-between shadow-xl">
+        <div>
+          <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">Urgent Blood Requests</p>
+          <p class="text-3xl font-extrabold text-white mt-2">{{ pending_requests|length if pending_requests else 0 }}</p>
+          <p class="text-xs text-rose-400 mt-2 flex items-center gap-1"><i class="fas fa-triangle-exclamation"></i> Action Required</p>
+        </div>
+        <div class="h-14 w-14 bg-rose-500/10 text-rose-400 rounded-2xl flex items-center justify-center text-2xl border border-rose-500/20">
+          <i class="fas fa-truck-medical"></i>
+        </div>
+      </div>
+
+      <!-- Approved History -->
+      <div class="bg-slate-800/60 border border-slate-700/60 p-6 rounded-2xl flex items-center justify-between shadow-xl">
+        <div>
+          <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">Fulfilled Alerts</p>
+          <p class="text-3xl font-extrabold text-white mt-2">{{ approved_requests|length if approved_requests else 0 }}</p>
+          <p class="text-xs text-blue-400 mt-2 flex items-center gap-1"><i class="fas fa-bullhorn"></i> Alerts Sent</p>
+        </div>
+        <div class="h-14 w-14 bg-blue-500/10 text-blue-400 rounded-2xl flex items-center justify-center text-2xl border border-blue-500/20">
+          <i class="fas fa-heart-circle-check"></i>
+        </div>
+      </div>
+
     </div>
-  </aside>
 
-  <!-- Main Content -->
-  <main class="flex-1 p-8 overflow-y-auto">
-    <header class="flex justify-between items-center mb-8 pb-4 border-b border-gray-200">
-      <h1 class="text-4xl font-extrabold text-gray-800">Welcome, Admin <span class="text-red-600">{{ session.admin_name }}</span>!</h1>
-      <div class="flex items-center space-x-4">
-        <span class="text-gray-600">Administrator</span>
-        <img src="https://via.placeholder.com/40" alt="Admin Avatar" class="rounded-full ring-2 ring-red-500">
-      </div>
-    </header>
-
-    <!-- Dashboard Overview -->
-    <section id="dashboard-overview" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
-      <div class="bg-white p-6 rounded-xl shadow-lg border border-gray-100 flex items-center justify-between">
-        <div>
-          <p class="text-gray-500 text-sm">Total Pending Donors</p>
-          <p class="text-3xl font-bold text-gray-800">{{ donors|length if donors else 0 }}</p>
+    <!-- Visual Analytics Grid: Charts & Heatmap -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      
+      <!-- Leaflet Geographic Heatmap (2 Columns) -->
+      <div class="lg:col-span-2 bg-slate-800/60 border border-slate-700/60 p-6 rounded-2xl shadow-xl flex flex-col justify-between">
+        <div class="flex items-center justify-between mb-4">
+          <div>
+            <h3 class="text-lg font-bold text-white flex items-center gap-2">
+              <i class="fas fa-map-location-dot text-red-500"></i> Donor Geographic Distribution & Density Heatmap
+            </h3>
+            <p class="text-xs text-slate-400">Live spatial mapping of verified donors across major regional hubs</p>
+          </div>
+          <span class="px-3 py-1 bg-red-500/10 text-red-400 text-xs font-semibold border border-red-500/20 rounded-lg">LIVE MAP</span>
         </div>
-        <i class="fas fa-user-plus text-red-500 text-5xl opacity-20"></i>
+        
+        <div id="heatmap-container" class="w-full z-10 border border-slate-700/80 shadow-inner"></div>
       </div>
-      <div class="bg-white p-6 rounded-xl shadow-lg border border-gray-100 flex items-center justify-between">
-        <div>
-          <p class="text-gray-500 text-sm">Total Pending Blood Requests</p>
-          <p class="text-3xl font-bold text-gray-800">{{ pending_requests|length if pending_requests else 0 }}</p>
-        </div>
-        <i class="fas fa-hand-holding-medical text-blue-500 text-5xl opacity-20"></i>
-      </div>
-      <div class="bg-white p-6 rounded-xl shadow-lg border border-gray-100 flex items-center justify-between">
-        <div>
-          <p class="text-gray-500 text-sm">Verified Donors</p>
-          <p class="text-3xl font-bold text-gray-800">{{ approved_requests|length if approved_requests else 0 }}</p>
-        </div>
-        <i class="fas fa-check-circle text-green-500 text-5xl opacity-20"></i>
-      </div>
-    </section>
 
-    <!-- Dynamic Content Area -->
-    <div id="content-area">
+      <!-- Chart.js Stock Distribution (1 Column) -->
+      <div class="bg-slate-800/60 border border-slate-700/60 p-6 rounded-2xl shadow-xl flex flex-col justify-between">
+        <div>
+          <h3 class="text-lg font-bold text-white mb-1 flex items-center gap-2">
+            <i class="fas fa-chart-pie text-red-500"></i> Blood Group Reserves
+          </h3>
+          <p class="text-xs text-slate-400 mb-6">Distribution of registered verified donors by group</p>
+          <div class="relative h-64 flex items-center justify-center">
+            <canvas id="bloodGroupChart"></canvas>
+          </div>
+        </div>
+        <div class="mt-4 text-center">
+          <span class="text-xs text-slate-400">Data updated dynamically from database</span>
+        </div>
+      </div>
 
-      <!-- Pending Donors Section -->
-      <section id="pending-donors-section" class="bg-white p-8 rounded-xl shadow-lg border border-gray-100 hidden">
-        <h3 class="text-3xl font-extrabold text-gray-800 mb-6 flex items-center space-x-3">
-          <i class="fas fa-user-plus text-red-500"></i>
-          <span>Pending Donors</span>
-        </h3>
+    </div>
+
+    <!-- Navigation Tabs for Tables -->
+    <div class="bg-slate-800/60 border border-slate-700/60 p-2 rounded-2xl flex flex-wrap gap-2">
+      <button onclick="switchTab('donors-tab')" id="tab-btn-donors" class="px-5 py-2.5 rounded-xl font-semibold text-sm transition flex items-center space-x-2 bg-red-600 text-white shadow-lg shadow-red-600/30">
+        <i class="fas fa-user-clock"></i><span>Pending Donors Approval ({{ donors|length if donors else 0 }})</span>
+      </button>
+      <button onclick="switchTab('verified-tab')" id="tab-btn-verified" class="px-5 py-2.5 rounded-xl font-semibold text-sm transition flex items-center space-x-2 text-slate-400 hover:text-white hover:bg-slate-700/50">
+        <i class="fas fa-address-book"></i><span>Verified Donors Directory ({{ verified_donors|length if verified_donors else 0 }})</span>
+      </button>
+      <button onclick="switchTab('requests-tab')" id="tab-btn-requests" class="px-5 py-2.5 rounded-xl font-semibold text-sm transition flex items-center space-x-2 text-slate-400 hover:text-white hover:bg-slate-700/50">
+        <i class="fas fa-hand-holding-medical"></i><span>Blood Requests ({{ pending_requests|length if pending_requests else 0 }})</span>
+      </button>
+      <button onclick="switchTab('history-tab')" id="tab-btn-history" class="px-5 py-2.5 rounded-xl font-semibold text-sm transition flex items-center space-x-2 text-slate-400 hover:text-white hover:bg-slate-700/50">
+        <i class="fas fa-clock-rotate-left"></i><span>Approved History ({{ approved_requests|length if approved_requests else 0 }})</span>
+      </button>
+    </div>
+
+    <!-- Tab Contents Section -->
+    <div class="bg-slate-800/60 border border-slate-700/60 rounded-2xl shadow-xl p-6">
+      
+      <!-- TAB 1: Pending Donors -->
+      <div id="donors-tab" class="tab-content">
+        <div class="flex items-center justify-between mb-6">
+          <h3 class="text-xl font-bold text-white flex items-center gap-2">
+            <i class="fas fa-user-clock text-amber-400"></i> Pending Donor Verification Requests
+          </h3>
+          <span class="text-xs text-slate-400">Review donor credentials before granting verified status</span>
+        </div>
+
         {% if donors %}
           <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-gray-200">
-              <thead class="bg-gray-50">
+            <table class="w-full text-left text-sm text-slate-300">
+              <thead class="text-xs uppercase bg-slate-900/60 text-slate-400 border-b border-slate-700/60">
                 <tr>
-                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Blood Group</th>
-                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Location</th>
-                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Contact</th>
-                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                  <th class="px-6 py-4">Donor Name</th>
+                  <th class="px-6 py-4">Blood Group</th>
+                  <th class="px-6 py-4">Location</th>
+                  <th class="px-6 py-4">Contact</th>
+                  <th class="px-6 py-4 text-right">Action</th>
                 </tr>
               </thead>
-              <tbody class="bg-white divide-y divide-gray-200">
+              <tbody class="divide-y divide-slate-700/60">
                 {% for donor in donors %}
-                  <tr class="hover:bg-gray-50">
-                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ donor.name }}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ donor.blood_group }}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ donor.location }}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ donor.contact }}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                      <a href="/admin/verify_donor/{{ donor.id }}" class="text-green-600 hover:text-green-900 font-semibold flex items-center space-x-1">
-                        <i class="fas fa-check-circle"></i>
-                        <span>Verify</span>
+                  <tr class="hover:bg-slate-700/30 transition">
+                    <td class="px-6 py-4 font-semibold text-white">{{ donor.name }}</td>
+                    <td class="px-6 py-4">
+                      <span class="px-3 py-1 bg-red-500/10 text-red-400 font-extrabold border border-red-500/20 rounded-lg">
+                        {{ donor.blood_group }}
+                      </span>
+                    </td>
+                    <td class="px-6 py-4"><i class="fas fa-location-dot text-slate-400 mr-2"></i>{{ donor.location }}</td>
+                    <td class="px-6 py-4"><i class="fas fa-phone text-slate-400 mr-2"></i>{{ donor.contact }}</td>
+                    <td class="px-6 py-4 text-right">
+                      <a href="/admin/verify_donor/{{ donor.id }}" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-semibold transition text-xs inline-flex items-center space-x-1 shadow-md shadow-emerald-600/30">
+                        <i class="fas fa-check-circle"></i><span>Verify Donor</span>
                       </a>
                     </td>
                   </tr>
@@ -126,79 +219,294 @@
             </table>
           </div>
         {% else %}
-          <p class="text-gray-600 italic">No pending donors.</p>
+          <div class="text-center py-12 text-slate-400">
+            <i class="fas fa-circle-check text-4xl text-emerald-400 mb-3 opacity-60"></i>
+            <p class="font-medium text-slate-300">All registered donors have been verified!</p>
+          </div>
         {% endif %}
-      </section>
+      </div>
 
-      <!-- Pending Blood Requests Section -->
-      <section id="blood-requests-section" class="bg-white p-8 rounded-xl shadow-lg border border-gray-100 hidden">
-        <h3 class="text-3xl font-extrabold text-gray-800 mb-6 flex items-center space-x-3">
-          <i class="fas fa-hand-holding-medical text-blue-500"></i>
-          <span>Pending Blood Requests</span>
-        </h3>
+      <!-- TAB 2: Verified Donors Directory -->
+      <div id="verified-tab" class="tab-content hidden">
+        <div class="flex items-center justify-between mb-6">
+          <h3 class="text-xl font-bold text-white flex items-center gap-2">
+            <i class="fas fa-address-book text-emerald-400"></i> Verified Donors Directory
+          </h3>
+          <input type="text" id="donorSearchInput" onkeyup="filterDonorTable()" placeholder="Search by name, group, city..." 
+                 class="px-4 py-2 bg-slate-900/60 border border-slate-700/80 rounded-xl text-sm text-slate-200 focus:outline-none focus:border-red-500 w-64">
+        </div>
+
+        {% if verified_donors %}
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-sm text-slate-300" id="verifiedDonorTable">
+              <thead class="text-xs uppercase bg-slate-900/60 text-slate-400 border-b border-slate-700/60">
+                <tr>
+                  <th class="px-6 py-4">Name</th>
+                  <th class="px-6 py-4">Email</th>
+                  <th class="px-6 py-4">Blood Group</th>
+                  <th class="px-6 py-4">City / Location</th>
+                  <th class="px-6 py-4">Contact</th>
+                  <th class="px-6 py-4 text-center">Status</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-700/60">
+                {% for donor in verified_donors %}
+                  <tr class="hover:bg-slate-700/30 transition">
+                    <td class="px-6 py-4 font-semibold text-white">{{ donor.name }}</td>
+                    <td class="px-6 py-4 text-slate-400">{{ donor.email }}</td>
+                    <td class="px-6 py-4">
+                      <span class="px-3 py-1 bg-red-500/10 text-red-400 font-extrabold border border-red-500/20 rounded-lg">
+                        {{ donor.blood_group }}
+                      </span>
+                    </td>
+                    <td class="px-6 py-4"><i class="fas fa-location-dot text-slate-400 mr-2"></i>{{ donor.location }}</td>
+                    <td class="px-6 py-4"><i class="fas fa-phone text-slate-400 mr-2"></i>{{ donor.contact }}</td>
+                    <td class="px-6 py-4 text-center">
+                      <span class="px-3 py-1 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-xs font-semibold rounded-full">
+                        <i class="fas fa-check mr-1"></i> Verified
+                      </span>
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        {% else %}
+          <div class="text-center py-12 text-slate-400">
+            <p>No verified donors found.</p>
+          </div>
+        {% endif %}
+      </div>
+
+      <!-- TAB 3: Pending Blood Requests -->
+      <div id="requests-tab" class="tab-content hidden">
+        <div class="flex items-center justify-between mb-6">
+          <h3 class="text-xl font-bold text-white flex items-center gap-2">
+            <i class="fas fa-hand-holding-medical text-rose-400"></i> Pending Emergency Requests
+          </h3>
+          <span class="text-xs text-slate-400">Approve request to trigger notifications or search matching donors</span>
+        </div>
+
         {% if pending_requests %}
-          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             {% for req in pending_requests %}
-              <div class="bg-blue-50 p-6 rounded-lg shadow-sm border border-blue-100 flex flex-col justify-between">
+              <div class="bg-slate-900/60 border border-slate-700/80 p-6 rounded-2xl flex flex-col justify-between shadow-lg">
                 <div>
-                  <p class="text-lg font-bold text-blue-800 mb-2">{{ req.requester_name }} needs <span class="font-bold">{{ req.blood_group }}</span></p>
-                  <p class="text-gray-700"><i class="fas fa-map-marker-alt mr-2 text-blue-500"></i>Location: {{ req.location }}</p>
-                  <p class="text-gray-700"><i class="fas fa-phone-alt mr-2 text-blue-500"></i>Contact: {{ req.contact }}</p>
-                  <p class="text-gray-700 mt-3"><i class="fas fa-comment-dots mr-2 text-blue-500"></i>Message: {{ req.message }}</p>
+                  <div class="flex justify-between items-start mb-3">
+                    <span class="px-3.5 py-1 bg-red-500/20 text-red-300 font-extrabold border border-red-500/40 rounded-xl text-base">
+                      {{ req.blood_group }}
+                    </span>
+                    <span class="px-3 py-1 bg-rose-500/10 text-rose-400 border border-rose-500/20 text-xs font-semibold rounded-full">
+                      <i class="fas fa-clock mr-1"></i> Pending
+                    </span>
+                  </div>
+
+                  <h4 class="text-lg font-bold text-white mb-2">{{ req.requester_name }}</h4>
+                  <p class="text-sm text-slate-300 mb-1"><i class="fas fa-hospital text-red-400 mr-2"></i>{{ req.location }}</p>
+                  <p class="text-sm text-slate-300 mb-3"><i class="fas fa-phone text-red-400 mr-2"></i>{{ req.contact }}</p>
+                  
+                  {% if req.message %}
+                    <p class="text-xs bg-slate-800/80 p-3 rounded-xl text-slate-300 italic border border-slate-700/60 mb-4">
+                      "{{ req.message }}"
+                    </p>
+                  {% endif %}
                 </div>
-                <div class="mt-4 flex flex-wrap gap-2">
-                  <a href="/admin/approve_request/{{ req.id }}" class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded">Approve</a>
-                  <a href="/admin/reject_request/{{ req.id }}" class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded">Reject</a>
-                  <a href="/send_alert/{{ req.id }}" class="bg-indigo-500 hover:bg-indigo-600 text-white px-3 py-1 rounded">Send Alert</a>
-                  <a href="/recommend_donors/{{ req.id }}" class="bg-purple-500 hover:bg-purple-600 text-white px-3 py-1 rounded">Recommend Donors</a>
+
+                <div class="flex flex-wrap gap-2 pt-4 border-t border-slate-700/60">
+                  <a href="/admin/approve_request/{{ req.id }}" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-semibold text-xs transition flex items-center space-x-1">
+                    <i class="fas fa-check"></i><span>Approve</span>
+                  </a>
+                  <a href="/send_alert/{{ req.id }}" class="px-3.5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-semibold text-xs transition flex items-center space-x-1 shadow-md shadow-indigo-600/30">
+                    <i class="fas fa-paper-plane"></i><span>Send Alert</span>
+                  </a>
+                  <a href="/recommend_donors/{{ req.id }}" class="px-3.5 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-xl font-semibold text-xs transition flex items-center space-x-1">
+                    <i class="fas fa-bullseye"></i><span>Match Donors</span>
+                  </a>
+                  <a href="/admin/reject_request/{{ req.id }}" class="px-3.5 py-2 bg-rose-600/20 hover:bg-rose-600/40 text-rose-300 border border-rose-500/30 rounded-xl font-semibold text-xs transition flex items-center space-x-1">
+                    <i class="fas fa-trash"></i><span>Reject</span>
+                  </a>
                 </div>
               </div>
             {% endfor %}
           </div>
         {% else %}
-          <p class="text-gray-600 italic">No pending blood requests.</p>
+          <div class="text-center py-12 text-slate-400">
+            <i class="fas fa-circle-check text-4xl text-emerald-400 mb-3 opacity-60"></i>
+            <p>No pending blood requests.</p>
+          </div>
         {% endif %}
-      </section>
+      </div>
 
-    </div> <!-- End Dynamic Content Area -->
+      <!-- TAB 4: Approved History -->
+      <div id="history-tab" class="tab-content hidden">
+        <div class="flex items-center justify-between mb-6">
+          <h3 class="text-xl font-bold text-white flex items-center gap-2">
+            <i class="fas fa-clock-rotate-left text-blue-400"></i> Approved & Broadcasted Requests
+          </h3>
+          <span class="text-xs text-slate-400">History log of fulfilled or active emergency requests</span>
+        </div>
 
+        {% if approved_requests %}
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-sm text-slate-300">
+              <thead class="text-xs uppercase bg-slate-900/60 text-slate-400 border-b border-slate-700/60">
+                <tr>
+                  <th class="px-6 py-4">Patient / Requester</th>
+                  <th class="px-6 py-4">Group Needed</th>
+                  <th class="px-6 py-4">Hospital / Location</th>
+                  <th class="px-6 py-4">Contact</th>
+                  <th class="px-6 py-4 text-center">Status</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-700/60">
+                {% for req in approved_requests %}
+                  <tr class="hover:bg-slate-700/30 transition">
+                    <td class="px-6 py-4 font-semibold text-white">{{ req.requester_name }}</td>
+                    <td class="px-6 py-4">
+                      <span class="px-3 py-1 bg-red-500/10 text-red-400 font-extrabold border border-red-500/20 rounded-lg">
+                        {{ req.blood_group }}
+                      </span>
+                    </td>
+                    <td class="px-6 py-4"><i class="fas fa-hospital text-slate-400 mr-2"></i>{{ req.location }}</td>
+                    <td class="px-6 py-4"><i class="fas fa-phone text-slate-400 mr-2"></i>{{ req.contact }}</td>
+                    <td class="px-6 py-4 text-center">
+                      <span class="px-3 py-1 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-xs font-semibold rounded-full">
+                        <i class="fas fa-circle-check mr-1"></i> Approved & Broadcasted
+                      </span>
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        {% else %}
+          <div class="text-center py-12 text-slate-400">
+            <p>No historical requests recorded.</p>
+          </div>
+        {% endif %}
+      </div>
+
+    </div>
   </main>
-</div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.js"></script>
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-  const dashboardLink = document.getElementById('dashboard-link');
-  const donorsLink = document.getElementById('donors-link');
-  const requestsLink = document.getElementById('requests-link');
+  <!-- JavaScript for Tabs, Chart.js & Leaflet Map -->
+  <script>
+    // Tab switching logic
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+      document.getElementById(tabId).classList.remove('hidden');
 
-  const dashboardOverview = document.getElementById('dashboard-overview');
-  const pendingDonorsSection = document.getElementById('pending-donors-section');
-  const bloodRequestsSection = document.getElementById('blood-requests-section');
+      const tabs = ['donors', 'verified', 'requests', 'history'];
+      tabs.forEach(t => {
+        const btn = document.getElementById('tab-btn-' + t);
+        if (t + '-tab' === tabId) {
+          btn.className = 'px-5 py-2.5 rounded-xl font-semibold text-sm transition flex items-center space-x-2 bg-red-600 text-white shadow-lg shadow-red-600/30';
+        } else {
+          btn.className = 'px-5 py-2.5 rounded-xl font-semibold text-sm transition flex items-center space-x-2 text-slate-400 hover:text-white hover:bg-slate-700/50';
+        }
+      });
+    }
 
-  function activateLink(link) {
-    document.querySelectorAll('nav a').forEach(a => {
-      a.classList.remove('bg-gray-700','text-white');
-      a.classList.add('text-gray-300');
+    // Filter table function
+    function filterDonorTable() {
+      const input = document.getElementById("donorSearchInput");
+      const filter = input.value.toLowerCase();
+      const table = document.getElementById("verifiedDonorTable");
+      const tr = table.getElementsByTagName("tr");
+
+      for (let i = 1; i < tr.length; i++) {
+        const txtValue = tr[i].textContent || tr[i].innerText;
+        tr[i].style.display = txtValue.toLowerCase().indexOf(filter) > -1 ? "" : "none";
+      }
+    }
+
+    // Load Charts & Leaflet Map on DOM ready
+    document.addEventListener("DOMContentLoaded", function() {
+      
+      // Fetch stats for Chart.js
+      fetch('/api/admin/stats')
+        .then(res => res.json())
+        .then(data => {
+          const bgData = data.blood_groups;
+          const labels = Object.keys(bgData);
+          const counts = Object.values(bgData);
+
+          const ctx = document.getElementById('bloodGroupChart').getContext('2d');
+          new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+              labels: labels,
+              datasets: [{
+                data: counts,
+                backgroundColor: [
+                  '#ef4444', '#f97316', '#f59e0b', '#10b981', 
+                  '#06b6d4', '#3b82f6', '#8b5cf6', '#ec4899'
+                ],
+                borderWidth: 2,
+                borderColor: '#1e293b'
+              }]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: {
+                legend: {
+                  position: 'right',
+                  labels: { color: '#cbd5e1', font: { family: 'Plus Jakarta Sans', size: 11 } }
+                }
+              }
+            }
+          });
+        });
+
+      // Initialize Leaflet Map
+      const map = L.map('heatmap-container').setView([20.5937, 78.9629], 5); // Centered on India
+
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+        maxZoom: 18
+      }).addTo(map);
+
+      // Fetch Geo Data for Leaflet Markers & Heatmap
+      fetch('/api/admin/geo_data')
+        .then(res => res.json())
+        .then(donors => {
+          const heatPoints = [];
+
+          donors.forEach(d => {
+            // Add point for heatmap
+            heatPoints.push([d.lat, d.lng, 0.8]);
+
+            // Custom Leaflet marker icon
+            const customIcon = L.divIcon({
+              className: 'custom-pin',
+              html: `<div style="background-color: #ef4444; color: white; border-radius: 50%; width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 10px; border: 2px solid white; box-shadow: 0 0 10px rgba(239, 68, 68, 0.6);">${d.blood_group}</div>`,
+              iconSize: [26, 26],
+              iconAnchor: [13, 13]
+            });
+
+            L.marker([d.lat, d.lng], { icon: customIcon })
+              .addTo(map)
+              .bindPopup(`
+                <div style="font-family: 'Plus Jakarta Sans', sans-serif; padding: 4px;">
+                  <strong style="color: #ef4444; font-size: 14px;">${d.name}</strong> (${d.blood_group})<br>
+                  📍 <strong>City:</strong> ${d.location}<br>
+                  📞 <strong>Contact:</strong> ${d.contact}
+                </div>
+              `);
+          });
+
+          // Add Leaflet Heatmap Layer
+          if (typeof L.heatLayer === 'function' && heatPoints.length > 0) {
+            L.heatLayer(heatPoints, {
+              radius: 35,
+              blur: 20,
+              maxZoom: 10,
+              gradient: { 0.4: 'blue', 0.65: 'lime', 1: 'red' }
+            }).addTo(map);
+          }
+        });
     });
-    link.classList.add('bg-gray-700','text-white');
-    link.classList.remove('text-gray-300');
-  }
-
-  function showSection(section) {
-    dashboardOverview.classList.add('hidden');
-    pendingDonorsSection.classList.add('hidden');
-    bloodRequestsSection.classList.add('hidden');
-    section.classList.remove('hidden');
-  }
-
-  activateLink(dashboardLink);
-  showSection(dashboardOverview);
-
-  dashboardLink.addEventListener('click', function(e){ e.preventDefault(); activateLink(this); showSection(dashboardOverview); });
-  donorsLink.addEventListener('click', function(e){ e.preventDefault(); activateLink(this); showSection(pendingDonorsSection); });
-  requestsLink.addEventListener('click', function(e){ e.preventDefault(); activateLink(this); showSection(bloodRequestsSection); });
-});
-</script>
+  </script>
 </body>
 </html>
