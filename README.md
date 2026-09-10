@@ -32,9 +32,6 @@ BloodConnect is a web application designed to connect patients in need of emerge
 | :--- | :--- | :--- |
 | **Admin** | `admin@admin` | `admin` |
 | **Admin** | `admin` | `admin` |
-| **Admin** | `hamizkhan@ggsf.edu.in` | `12345678` |
-| **User** | `hamizkhan@ggsf.edu.in` | `12345678` |
-
 ---
 
 ## 🚀 Getting Started
