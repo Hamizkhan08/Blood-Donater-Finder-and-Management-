@@ -4,10 +4,17 @@ import sqlite3
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_mail import Mail, Message
 from dotenv import load_dotenv
+import tempfile
 import os
 from functools import wraps
 
 load_dotenv()
+
+IS_VERCEL = os.getenv("VERCEL", "0") == "1" or os.getenv("VERCEL_ENV") is not None
+if IS_VERCEL:
+    SQLITE_DB_PATH = os.path.join(tempfile.gettempdir(), "bloodfinder.db")
+else:
+    SQLITE_DB_PATH = "bloodfinder.db"
 
 app = Flask(__name__)
 app.secret_key = os.getenv("SECRET_KEY", "bloodnet_super_secret_key_2026_safe")
@@ -55,8 +62,9 @@ class SQLiteDictCursor:
         self.close()
 
 class SQLiteConnectionWrapper:
-    def __init__(self, db_path="bloodfinder.db"):
-        self.conn = sqlite3.connect(db_path)
+    def __init__(self, db_path=None):
+        target_path = db_path or SQLITE_DB_PATH
+        self.conn = sqlite3.connect(target_path)
         self.conn.row_factory = sqlite3.Row
 
     def cursor(self):
@@ -78,8 +86,9 @@ class SQLiteConnectionWrapper:
             self.conn.commit()
         self.close()
 
-def init_sqlite_db(db_path="bloodfinder.db"):
-    conn = sqlite3.connect(db_path)
+def init_sqlite_db(db_path=None):
+    target_path = db_path or SQLITE_DB_PATH
+    conn = sqlite3.connect(target_path)
     cur = conn.cursor()
     cur.execute("""
     CREATE TABLE IF NOT EXISTS admins (
@@ -176,8 +185,8 @@ def get_db_connection():
         )
         return conn
     except Exception:
-        init_sqlite_db()
-        return SQLiteConnectionWrapper("bloodfinder.db")
+        init_sqlite_db(SQLITE_DB_PATH)
+        return SQLiteConnectionWrapper(SQLITE_DB_PATH)
 
 # Access Control Decorators
 def login_required(f):
